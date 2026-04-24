@@ -1,0 +1,16 @@
+:root {
+  color: #172033;
+  background: #f4f7fb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
