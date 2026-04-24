@@ -263,23 +263,30 @@ button {
 .subtabs {
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
 }
 
 .tabs,
 .subtabs {
-  border-bottom: 1px solid #dfe6f0;
-  padding-bottom: 0;
+  border-bottom: 1px solid #d7dfeb;
+  padding: 4px 0 0;
+  margin-top: 2px;
 }
 
 .tab,
 .subtab {
-  padding: 10px 4px 12px;
+  padding: 10px 2px 12px;
   border-radius: 0;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   background: transparent;
-  color: #65738a;
-  font-weight: 600;
+  color: #47566f;
+  font-weight: 700;
+}
+
+.tab:hover,
+.subtab:hover {
+  color: #24324a;
 }
 
 .tab.active,
