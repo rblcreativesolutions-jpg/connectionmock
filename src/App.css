@@ -1,13 +1,18 @@
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #182235;
-  background: #f3f6fb;
+  color: #111827;
+  background: #f8fafc;
   line-height: 1.45;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --brand-primary: #e5097f;
+  --brand-primary-active: #c6086e;
+  --brand-dark-button: #2b2e4a;
+  --border-subtle: #e5e7eb;
+  --bg-subtle: #f8fafc;
 }
 
 * {
@@ -16,7 +21,7 @@
 
 body {
   margin: 0;
-  background: #f5f7fb;
+  background: #f8fafc;
 }
 
 button,
@@ -42,7 +47,7 @@ button {
 
 .workspace-nav {
   background: #ffffff;
-  border-right: 1px solid #dfe6f0;
+  border-right: 1px solid var(--border-subtle);
   padding: 20px 18px;
   display: flex;
   flex-direction: column;
@@ -59,7 +64,7 @@ button {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #ef4ca6, #7c3aed);
+  background: var(--brand-primary);
   color: white;
   display: grid;
   place-items: center;
@@ -91,7 +96,7 @@ button {
 
 .nav-link.active,
 .base-item:hover {
-  background: #f6f8fc;
+  background: var(--bg-subtle);
 }
 
 .base-item {
@@ -131,7 +136,7 @@ button {
 .table-wrap td,
 .table-wrap th,
 .link-button {
-  color: #637289;
+  color: #4b5563;
   font-size: 14px;
 }
 
@@ -141,11 +146,11 @@ button {
 }
 
 .search {
-  border: 1px solid #d8e0ea;
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 10px 12px;
   background: white;
-  color: #7d8ba0;
+  color: #6b7280;
 }
 
 .search.large {
@@ -173,7 +178,7 @@ button {
 .provider-card,
 .panel {
   background: rgba(255, 255, 255, 0.98);
-  border: 1px solid #dde5f0;
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 14px 16px;
   box-shadow: none;
@@ -184,9 +189,9 @@ button {
 }
 
 .provider-card.selected {
-  border-color: #d84a91;
-  box-shadow: inset 3px 0 0 #d84a91;
-  background: #fcfbfe;
+  border-color: var(--brand-primary);
+  box-shadow: inset 3px 0 0 var(--brand-primary);
+  background: #fffafd;
 }
 
 .provider-header-row {
@@ -203,7 +208,7 @@ button {
 }
 
 .provider-detail-row strong {
-  color: #314158;
+  color: #111827;
   font-size: 13px;
   font-weight: 600;
 }
@@ -224,7 +229,7 @@ button {
 }
 
 .primary {
-  background: #e64b95;
+  background: var(--brand-dark-button);
   color: white;
 }
 
@@ -232,17 +237,17 @@ button {
 .page-chip,
 .toggle {
   background: white;
-  border: 1px solid #d9e1ec;
-  color: #394863;
+  border: 1px solid var(--border-subtle);
+  color: #374151;
 }
 
 .ghost.danger {
-  color: #b03d66;
+  color: var(--brand-primary);
 }
 
 .link-button {
   padding: 0;
-  color: #d84a91;
+  color: var(--brand-primary);
   font-weight: 700;
 }
 
@@ -268,7 +273,7 @@ button {
 
 .tabs,
 .subtabs {
-  border-bottom: 1px solid #d7dfeb;
+  border-bottom: 1px solid var(--border-subtle);
   padding: 4px 0 0;
   margin-top: 2px;
 }
@@ -280,25 +285,25 @@ button {
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
-  color: #47566f;
+  color: #4b5563;
   font-weight: 700;
 }
 
 .tab:hover,
 .subtab:hover {
-  color: #24324a;
+  color: #111827;
 }
 
 .tab.active,
 .subtab.active {
   background: transparent;
-  color: #d84a91;
-  border-color: #d84a91;
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
 }
 
 .table-wrap {
   overflow: hidden;
-  border: 1px solid #e3e9f2;
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   margin-top: 12px;
 }
@@ -312,12 +317,12 @@ th,
 td {
   text-align: left;
   padding: 12px 14px;
-  border-bottom: 1px solid #edf2f8;
+  border-bottom: 1px solid var(--border-subtle);
   vertical-align: top;
 }
 
 th {
-  background: #fafbfd;
+  background: #f8fafc;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -362,9 +367,9 @@ tbody tr:last-child td {
 }
 
 .page-chip.active {
-  background: #162234;
+  background: var(--brand-dark-button);
   color: white;
-  border-color: #162234;
+  border-color: var(--brand-dark-button);
 }
 
 .schema-name-cell {
@@ -377,9 +382,9 @@ tbody tr:last-child td {
 }
 
 .toggle.on {
-  background: #162234;
+  background: var(--brand-dark-button);
   color: white;
-  border-color: #162234;
+  border-color: var(--brand-dark-button);
 }
 
 .panel-head {
