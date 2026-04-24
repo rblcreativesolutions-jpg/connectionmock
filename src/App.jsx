@@ -1,814 +1,351 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
-const providers = [
+const providerRail = [
   {
     id: 'hubspot',
     name: 'HubSpot',
-    account: 'Acme Revenue Ops',
-    status: 'Connected',
-    tone: 'success',
-    lastSync: 'Last sync 18 minutes ago',
-    issueCount: 3,
+    action: 'Disconnect',
+    connected: true,
+    details: [
+      ['Hub Domain', "DO NOT DELETE Blake's Demo-dev-46365059.com"],
+      ['Connected User', 'blake@supered.io'],
+      ['Hub ID', '46365059'],
+      ['Process Enforcement Enabled?', 'YES'],
+      ['Object Library Enabled?', 'YES'],
+      ['Guide Hub ID', ''],
+    ],
   },
   {
     id: 'salesforce',
     name: 'Salesforce',
-    account: 'West Coast Pipeline',
-    status: 'Needs attention',
-    tone: 'warning',
-    lastSync: 'Schema refresh recommended',
-    issueCount: 2,
+    action: 'Disconnect',
+    connected: true,
+    details: [
+      ['Instance', 'Open'],
+      ['Connected User', 'blake@supered.io'],
+    ],
   },
   {
     id: 'slack',
     name: 'Slack',
-    account: 'Not connected',
-    status: 'Not connected',
-    tone: 'neutral',
-    lastSync: 'Connect to enable alerts',
-    issueCount: 0,
+    action: 'Connect',
+    connected: false,
+    details: [],
   },
 ]
 
-const overviewStats = [
-  { label: 'Linked users', value: '42', hint: '5 pending invites' },
-  { label: 'Objects configured', value: '3 / 4', hint: 'Deals needs review' },
-  { label: 'Schema health', value: 'Healthy', hint: 'Last refresh today, 1:12 PM' },
-]
-
-const attentionItems = [
-  { title: '14 users lost their HubSpot link', detail: 'They cannot sync actions until reconnected.', action: 'Review users' },
-  { title: '3 required fields are unmapped for Deals', detail: 'Two-way sync is blocked until required fields are resolved.', action: 'Fix mapping' },
-  { title: '2 new HubSpot fields were detected', detail: 'Review schema changes before publishing more mapping edits.', action: 'Review schema' },
-]
-
-const activityItems = [
-  { title: 'Deals schema synced successfully', time: '12 minutes ago' },
-  { title: '2 users invited to reconnect', time: '38 minutes ago' },
-  { title: 'Ticket mapping updated and published', time: 'Yesterday, 5:42 PM' },
-]
-
-const users = [
-  {
-    id: 1,
-    name: 'Jane Cooper',
-    email: 'jane@acme.com',
-    role: 'Admin',
-    status: 'Connected',
-    tone: 'success',
-    activity: 'Synced 15m ago',
-    action: 'No action needed',
-  },
-  {
-    id: 2,
-    name: 'Sam Lee',
-    email: 'sam@acme.com',
-    role: 'AE',
-    status: 'Disconnected',
-    tone: 'warning',
-    activity: 'Lost access yesterday',
-    action: 'Invite to reconnect',
-  },
-  {
-    id: 3,
-    name: 'Priya Shah',
-    email: 'priya@acme.com',
-    role: 'Manager',
-    status: 'Pending invite',
-    tone: 'neutral',
-    activity: 'Invite sent 2h ago',
-    action: 'Resend invite',
-  },
-  {
-    id: 4,
-    name: 'Miguel Alvarez',
-    email: 'miguel@acme.com',
-    role: 'RevOps',
-    status: 'Invite failed',
-    tone: 'danger',
-    activity: 'Delivery failed 20m ago',
-    action: 'Retry invite',
-  },
-  {
-    id: 5,
-    name: 'Lauren Burke',
-    email: 'lauren@acme.com',
-    role: 'CSM',
-    status: 'Connected',
-    tone: 'success',
-    activity: 'Synced 42m ago',
-    action: 'No action needed',
-  },
-]
-
-const objectCards = [
-  {
-    name: 'Deals',
-    description: 'Keep pipeline records aligned between Supered and HubSpot.',
-    status: 'Needs attention',
-    tone: 'warning',
-    meta: '12 fields mapped, 3 required missing',
-  },
-  {
-    name: 'Tickets',
-    description: 'Sync service work and action plans into HubSpot tickets.',
-    status: 'Configured',
-    tone: 'success',
-    meta: '18 fields mapped, synced 1h ago',
-  },
-  {
-    name: 'Projects',
-    description: 'Push project status and ownership to custom objects.',
-    status: 'Draft',
-    tone: 'neutral',
-    meta: 'Not yet active',
-  },
-  {
-    name: 'Custom Objects',
-    description: 'Map custom object types for advanced workflows.',
-    status: 'Not started',
-    tone: 'neutral',
-    meta: 'Schema refresh recommended first',
-  },
-]
-
-const mappings = [
-  {
-    required: true,
-    source: 'Action Plan Title',
-    type: 'Text',
-    target: 'Deal Name',
-    status: 'Mapped',
-    tone: 'success',
-    direction: 'Two-way',
-    note: 'Healthy',
-  },
-  {
-    required: true,
-    source: 'Owner',
-    type: 'User',
-    target: 'Deal Owner',
-    status: 'Mapped',
-    tone: 'success',
-    direction: 'Supered → HubSpot',
-    note: 'Uses owner resolution rule',
-  },
-  {
-    required: true,
-    source: 'Priority',
-    type: 'Enum',
-    target: 'Missing property',
-    status: 'Missing property',
-    tone: 'warning',
-    direction: 'Two-way',
-    note: 'Will create property on save',
-  },
-  {
-    required: false,
-    source: 'Projected revenue',
-    type: 'Currency',
-    target: 'Annual Contract Value',
-    status: 'Type mismatch',
-    tone: 'danger',
-    direction: 'Supered → HubSpot',
-    note: 'Currency vs number mismatch',
-  },
-  {
-    required: false,
-    source: 'Next step summary',
-    type: 'Long text',
-    target: 'Deal notes',
-    status: 'Mapped',
-    tone: 'success',
-    direction: 'Supered → HubSpot',
-    note: 'One-way sync',
-  },
-]
-
-const syncRules = [
-  { label: 'Create HubSpot records when missing', value: 'Enabled' },
-  { label: 'Conflict handling', value: 'Prefer latest edit with manual review flag' },
-  { label: 'Owner mapping', value: 'Resolve via provider user email' },
-  { label: 'Delete/archive behavior', value: 'Archive only, never hard delete' },
+const providerUsersRows = [
+  ['Ashley Cardenas', 'ashley@supered.io', 'Disconnected', 'Invite User'],
+  ['Blake Lytle', 'blake@supered.io', 'Connected', 'Manage'],
+  ['Dylan Ross', 'dylan@supered.io', 'Disconnected', 'Invite User'],
+  ['Jamie Young', 'jamie@supered.io', 'Disconnected', 'Invite User'],
+  ['Morgan Page', 'morgan@supered.io', 'Connected', 'Manage'],
 ]
 
 const schemaRows = [
+  ['Contact', 'Apr 23'],
+  ['User', 'Apr 23'],
+  ['Postal Mail', 'Apr 23'],
+  ['Order', 'Apr 23'],
+  ['Lead', 'Apr 23'],
+  ['Quote', 'Apr 23'],
+  ['Service', 'Apr 23'],
+  ['Communication (WhatsApp, SMS, LinkedIn)', 'Apr 23'],
+  ['Company', 'Apr 23'],
+  ['Task', 'Apr 23'],
+]
+
+const syncObjects = [
   {
-    object: 'Deals',
-    type: 'Core object',
-    fields: 54,
-    synced: 'Today, 1:12 PM',
-    status: 'Synced',
-    tone: 'success',
-    changes: '2 new fields',
+    object: 'Ticket',
+    description: 'Map Action Plan fields into HubSpot ticket properties.',
+    rows: [
+      ['Action Plan Name', 'Ticket name', 'Mapped'],
+      ['Priority', 'Priority', 'Mapped'],
+      ['Owner', 'Ticket owner', 'Mapped'],
+      ['Status', 'Status', 'Mapped'],
+    ],
   },
   {
-    object: 'Tickets',
-    type: 'Core object',
-    fields: 31,
-    synced: 'Today, 1:10 PM',
-    status: 'Synced',
-    tone: 'success',
-    changes: 'No changes',
+    object: 'Deal',
+    description: 'Keep action plans and deal data aligned.',
+    rows: [
+      ['Action Plan Name', 'Deal name', 'Mapped'],
+      ['Owner', 'Deal owner', 'Mapped'],
+      ['Priority', 'Create property', 'Needs setup'],
+      ['Due Date', 'Close date', 'Mapped'],
+    ],
   },
   {
-    object: 'Projects',
-    type: 'Custom object',
-    fields: 18,
-    synced: 'Yesterday, 5:42 PM',
-    status: 'Needs review',
-    tone: 'warning',
-    changes: 'Schema outdated',
+    object: 'Project',
+    description: 'Mirror project state into project-like CRM objects.',
+    rows: [
+      ['Project Name', 'Project title', 'Mapped'],
+      ['Project Stage', 'Status', 'Mapped'],
+      ['Project Owner', 'Owner', 'Mapped'],
+      ['Launch Date', 'Start date', 'Mapped'],
+    ],
   },
   {
-    object: 'Custom Playbooks',
-    type: 'Custom object',
-    fields: 12,
-    synced: 'Never',
-    status: 'Error',
-    tone: 'danger',
-    changes: 'Auth required',
+    object: 'Custom Objects',
+    description: 'Custom object mappings supported by your HubSpot schema.',
+    rows: [
+      ['Custom Name', 'Find existing property', 'Mapped'],
+      ['Custom Owner', 'Find existing property', 'Mapped'],
+      ['Custom Status', 'Create property', 'Needs setup'],
+      ['Custom Notes', 'Find existing property', 'Mapped'],
+    ],
   },
 ]
 
-function Badge({ children, tone = 'neutral' }) {
-  return <span className={`badge ${tone}`}>{children}</span>
-}
-
-function SectionCard({ title, subtitle, actions, children }) {
+function SectionShell({ title, action, children }) {
   return (
-    <section className="section-card">
-      <div className="section-head">
-        <div>
-          <h3>{title}</h3>
-          {subtitle ? <p>{subtitle}</p> : null}
-        </div>
-        {actions ? <div className="section-actions">{actions}</div> : null}
+    <section className="panel">
+      <div className="panel-head">
+        <h3>{title}</h3>
+        {action ? <div className="panel-action">{action}</div> : null}
       </div>
       {children}
     </section>
   )
 }
 
-function OverviewPage({ onJump }) {
+function ProviderUsersSection() {
   return (
-    <div className="page-stack">
-      <div className="stats-grid">
-        {overviewStats.map((item) => (
-          <SectionCard key={item.label} title={item.value} subtitle={item.label}>
-            <p className="muted">{item.hint}</p>
-          </SectionCard>
-        ))}
+    <SectionShell title="Provider Users">
+      <div className="table-tools">
+        <input className="search" value="Search..." readOnly />
+        <button className="primary small">Invite Team Member</button>
       </div>
-
-      <SectionCard title="Attention needed" subtitle="Fix the urgent items before the next sync run.">
-        <div className="list-stack">
-          {attentionItems.map((item) => (
-            <div key={item.title} className="list-row">
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.detail}</p>
-              </div>
-              <button className="btn btn-secondary small" onClick={() => onJump(item.action)}>{item.action}</button>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      <div className="overview-grid">
-        <SectionCard title="Recent activity" subtitle="Make system freshness and recent changes obvious.">
-          <div className="activity-list">
-            {activityItems.map((item) => (
-              <div key={item.title} className="activity-row">
-                <div>
-                  <strong>{item.title}</strong>
-                </div>
-                <span>{item.time}</span>
-              </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {providerUsersRows.map(([name, email, status, action]) => (
+              <tr key={email}>
+                <td>{name}</td>
+                <td>{email}</td>
+                <td>
+                  <span className={`status-pill ${status === 'Connected' ? 'good' : 'warn'}`}>{status}</span>
+                </td>
+                <td>
+                  <button className={action === 'Manage' ? 'ghost small' : 'primary small'}>{action}</button>
+                </td>
+              </tr>
             ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="What changed in the redesign" subtitle="The prototype fixes the pain points from the live screenshots.">
-          <ul className="bullet-list">
-            <li>Provider rail simplified into clean status cards instead of dense metadata blocks.</li>
-            <li>Overview added so admins don’t land in a noisy table first.</li>
-            <li>Users, Sync Setup, and Schema now each have their own focused workspace.</li>
-            <li>Risky actions are pushed into lower-emphasis controls and confirmation patterns.</li>
-          </ul>
-        </SectionCard>
+          </tbody>
+        </table>
       </div>
-    </div>
+      <div className="pager muted-row">
+        <span>Showing 1 to 5 of 5 results</span>
+      </div>
+    </SectionShell>
   )
 }
 
-function UsersPage() {
-  const [selectedUser, setSelectedUser] = useState(users[1])
-  const [selectedIds, setSelectedIds] = useState([2, 3])
-
-  const toggleSelection = (id) => {
-    setSelectedIds((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-    )
-  }
+function ActionPlanSyncSection() {
+  const [activeObject, setActiveObject] = useState('Deal')
+  const selectedObject = syncObjects.find((item) => item.object === activeObject)
 
   return (
-    <div className="stage-layout">
-      <div className="primary-column">
-        <div className="summary-chip-row">
-          <div className="summary-chip"><strong>24</strong><span>Total users</span></div>
-          <div className="summary-chip"><strong>17</strong><span>Connected</span></div>
-          <div className="summary-chip warning"><strong>7</strong><span>Disconnected</span></div>
-          <div className="summary-chip neutral"><strong>2</strong><span>Pending invite</span></div>
-        </div>
-
-        <SectionCard
-          title="Provider users"
-          subtitle="Separate user state, recommended action, and bulk operations clearly."
-          actions={
-            <>
-              <button className="btn btn-secondary small">Export CSV</button>
-              <button className="btn btn-primary small">Invite users</button>
-            </>
-          }
-        >
-          <div className="toolbar-row">
-            <input className="search-input" value="Search by name or email" readOnly />
-            <div className="chip-row">
-              <Badge>All</Badge>
-              <Badge tone="success">Connected</Badge>
-              <Badge tone="warning">Disconnected</Badge>
-              <Badge>Pending invite</Badge>
-            </div>
-          </div>
-
-          {selectedIds.length ? (
-            <div className="bulk-bar">
-              <strong>{selectedIds.length} selected</strong>
-              <div className="section-actions">
-                <button className="btn btn-secondary small">Invite selected</button>
-                <button className="btn btn-secondary small">Resend invites</button>
-                <button className="btn btn-secondary small">Clear</button>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Last activity</th>
-                  <th>Recommended action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr
-                    key={user.email}
-                    className={selectedUser.id === user.id ? 'row-selected' : ''}
-                    onClick={() => setSelectedUser(user)}
-                  >
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(user.id)}
-                        onChange={() => toggleSelection(user.id)}
-                        onClick={(event) => event.stopPropagation()}
-                      />
-                    </td>
-                    <td>
-                      <strong>{user.name}</strong>
-                      <span>{user.email}</span>
-                    </td>
-                    <td>{user.role}</td>
-                    <td>
-                      <Badge tone={user.tone}>{user.status}</Badge>
-                    </td>
-                    <td>{user.activity}</td>
-                    <td className="action-cell">
-                      <span>{user.action}</span>
-                      {user.action !== 'No action needed' ? <button className="text-link">Open</button> : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SectionCard>
-      </div>
-
-      <aside className="helper-column">
-        <SectionCard title="User detail" subtitle="Example right-side panel opened from the table.">
-          <div className="helper-block">
-            <strong>{selectedUser.name}</strong>
-            <p>{selectedUser.email}</p>
-          </div>
-          <div className="helper-block">
-            <strong>Status timeline</strong>
-            <ul>
-              <li>Connected successfully on Apr 12</li>
-              <li>Provider access changed on Apr 23</li>
-              <li>Current state: {selectedUser.status}</li>
-            </ul>
-          </div>
-          <div className="helper-block">
-            <strong>Suggested action</strong>
-            <p>{selectedUser.action === 'No action needed' ? 'Nothing urgent. User is syncing normally.' : selectedUser.action}</p>
-          </div>
-          <button className="btn btn-primary full">Send reconnect flow</button>
-        </SectionCard>
-      </aside>
-    </div>
-  )
-}
-
-function SyncSetupPage() {
-  const [syncSubTab, setSyncSubTab] = useState('Objects')
-
-  return (
-    <div className="page-stack">
-      <div className="subtab-row">
-        {['Objects', 'Field Mapping', 'Sync Rules', 'Activity Log'].map((item) => (
+    <SectionShell title="Action Plan Sync">
+      <div className="subtabs">
+        {syncObjects.map((item) => (
           <button
-            key={item}
-            className={`subtab ${syncSubTab === item ? 'active' : ''}`}
-            onClick={() => setSyncSubTab(item)}
+            key={item.object}
+            className={`subtab ${activeObject === item.object ? 'active' : ''}`}
+            onClick={() => setActiveObject(item.object)}
           >
-            {item}
+            {item.object}
           </button>
         ))}
       </div>
 
-      {syncSubTab === 'Objects' ? (
-        <div className="stage-layout">
-          <div className="primary-column">
-            <SectionCard
-              title="Objects to sync"
-              subtitle="Guide setup before users fall into a dense mapping table."
-              actions={<button className="btn btn-primary small">Continue setup</button>}
-            >
-              <div className="summary-chip-row compact">
-                <div className="summary-chip"><strong>Active</strong><span>Sync status</span></div>
-                <div className="summary-chip"><strong>3</strong><span>Objects enabled</span></div>
-                <div className="summary-chip"><strong>1h ago</strong><span>Last successful sync</span></div>
-              </div>
-              <div className="object-grid">
-                {objectCards.map((object) => (
-                  <article key={object.name} className="object-card">
-                    <div className="object-card-head">
-                      <div>
-                        <strong>{object.name}</strong>
-                        <p>{object.description}</p>
-                      </div>
-                      <Badge tone={object.tone}>{object.status}</Badge>
-                    </div>
-                    <div className="object-meta">{object.meta}</div>
-                  </article>
-                ))}
-              </div>
-            </SectionCard>
-          </div>
-
-          <aside className="helper-column">
-            <SectionCard title="Setup checklist" subtitle="Replace passive helper text with progress-oriented guidance.">
-              <ul className="checklist">
-                <li className="done">Select objects to sync</li>
-                <li className="done">Map required fields</li>
-                <li className="active">Review sync rules</li>
-                <li>Run test sync</li>
-              </ul>
-            </SectionCard>
-          </aside>
+      <div className="sync-topbar">
+        <div>
+          <strong>{selectedObject.object}</strong>
+          <p>{selectedObject.description}</p>
         </div>
-      ) : null}
-
-      {syncSubTab === 'Field Mapping' ? (
-        <div className="stage-layout">
-          <div className="primary-column">
-            <SectionCard
-              title="Field Mapping"
-              subtitle="Highlight required fields, validation, and safer property creation."
-              actions={
-                <>
-                  <button className="btn btn-secondary small">Run test sync</button>
-                  <button className="btn btn-primary small">Save changes</button>
-                </>
-              }
-            >
-              <div className="mapping-banner warning-banner">
-                You have 3 blocking issues, 1 type mismatch, and 6 unsaved changes.
-              </div>
-              <div className="mapping-toolbar">
-                <div className="inline-controls">
-                  <span className="control-pill">Object: Deals</span>
-                  <span className="control-pill">Direction: Two-way</span>
-                  <span className="control-pill">Sync active</span>
-                </div>
-                <button className="btn btn-secondary small">Create 1 missing property</button>
-              </div>
-              <div className="table-card">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Required</th>
-                      <th>Supered field</th>
-                      <th>Type</th>
-                      <th>HubSpot property</th>
-                      <th>Status</th>
-                      <th>Direction</th>
-                      <th>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mappings.map((row) => (
-                      <tr key={row.source}>
-                        <td>{row.required ? 'Required' : 'Optional'}</td>
-                        <td>{row.source}</td>
-                        <td>{row.type}</td>
-                        <td>{row.target}</td>
-                        <td>
-                          <Badge tone={row.tone}>{row.status}</Badge>
-                        </td>
-                        <td>{row.direction}</td>
-                        <td>{row.note}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </SectionCard>
-          </div>
-
-          <aside className="helper-column">
-            <SectionCard title="Selected field inspector" subtitle="Contextual side panel for field review and warnings.">
-              <div className="helper-block">
-                <strong>Priority</strong>
-                <p>Required enum field used for downstream routing and SLA reporting.</p>
-              </div>
-              <div className="helper-block">
-                <strong>Suggested action</strong>
-                <p>Create a matching HubSpot dropdown property before enabling two-way sync.</p>
-              </div>
-              <div className="helper-block">
-                <strong>Warnings</strong>
-                <ul>
-                  <li>Changing mapping may affect historical sync values.</li>
-                  <li>Type mismatch must be resolved before save.</li>
-                </ul>
-              </div>
-              <button className="btn btn-secondary full">Review property creation</button>
-            </SectionCard>
-          </aside>
+        <div className="sync-actions">
+          <label className="toggle-row"><span>Sync Active</span><span className="toggle on">On</span></label>
+          <label className="toggle-row"><span>Auto-Create</span><span className="toggle">Off</span></label>
+          <button className="ghost small">Clear</button>
+          <button className="ghost small">Create All Properties</button>
+          <button className="primary small">Save Mapping</button>
         </div>
-      ) : null}
+      </div>
 
-      {syncSubTab === 'Sync Rules' ? (
-        <SectionCard title="Sync Rules" subtitle="Move dense, technical settings into a clean rule workspace.">
-          <div className="rule-list">
-            {syncRules.map((rule) => (
-              <div key={rule.label} className="rule-row">
-                <div>
-                  <strong>{rule.label}</strong>
-                  <p>{rule.value}</p>
-                </div>
-                <button className="btn btn-secondary small">Edit</button>
-              </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Action Plan Field</th>
+              <th>HubSpot Property</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedObject.rows.map(([field, target, status]) => (
+              <tr key={field}>
+                <td>{field}</td>
+                <td>{target}</td>
+                <td>
+                  <span className={`status-pill ${status === 'Mapped' ? 'good' : 'warn'}`}>{status}</span>
+                </td>
+              </tr>
             ))}
-          </div>
-          <div className="sticky-footer-sim">
-            <span>3 unsaved rule changes</span>
-            <div className="section-actions">
-              <button className="btn btn-secondary small">Discard</button>
-              <button className="btn btn-primary small">Save changes</button>
-            </div>
-          </div>
-        </SectionCard>
-      ) : null}
-
-      {syncSubTab === 'Activity Log' ? (
-        <SectionCard title="Activity Log" subtitle="Surface what changed recently without forcing users into raw system logs.">
-          <div className="activity-list">
-            {activityItems.map((item) => (
-              <div key={item.title} className="activity-row">
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>Triggered by a workspace admin.</p>
-                </div>
-                <span>{item.time}</span>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-      ) : null}
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </SectionShell>
   )
 }
 
-function SchemaPage() {
-  const [isSyncing] = useState(true)
-
+function HubspotSchemaSection() {
   return (
-    <div className="stage-layout">
-      <div className="primary-column">
-        <SectionCard
-          title="Schema"
-          subtitle="Make schema freshness, change detection, and review actions obvious."
-          actions={
-            <>
-              <button className="btn btn-secondary small">View sync history</button>
-              <button className="btn btn-primary small">Sync schema</button>
-            </>
-          }
-        >
-          {isSyncing ? (
-            <div className="sync-banner">
-              Syncing schema for 12 objects. You can leave this page while the refresh continues.
-            </div>
-          ) : null}
-          <div className="summary-chip-row compact">
-            <div className="summary-chip"><strong>25</strong><span>Objects discovered</span></div>
-            <div className="summary-chip"><strong>Today</strong><span>Last schema sync</span></div>
-            <div className="summary-chip warning"><strong>2</strong><span>Objects need review</span></div>
-          </div>
-          <div className="toolbar-row">
-            <input className="search-input" value="Search objects" readOnly />
-            <div className="chip-row">
-              <Badge>All</Badge>
-              <Badge tone="warning">Outdated</Badge>
-              <Badge tone="danger">Error</Badge>
-            </div>
-          </div>
-          <div className="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Object</th>
-                  <th>Type</th>
-                  <th>Fields</th>
-                  <th>Last synced</th>
-                  <th>Status</th>
-                  <th>Source changes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schemaRows.map((row) => (
-                  <tr key={row.object}>
-                    <td>{row.object}</td>
-                    <td>{row.type}</td>
-                    <td>{row.fields}</td>
-                    <td>{row.synced}</td>
-                    <td>
-                      <Badge tone={row.tone}>{row.status}</Badge>
-                    </td>
-                    <td>{row.changes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SectionCard>
+    <SectionShell title="HubSpot Schema" action={<button className="primary small">Sync Schema</button>}>
+      <div className="schema-head-row muted-row">
+        <div className="selection-row">
+          <strong>0 Selected</strong>
+          <button className="link-button">Select All 25</button>
+        </div>
       </div>
-
-      <aside className="helper-column">
-        <SectionCard title="Selected object detail" subtitle="Drawer-like context panel for change review.">
-          <div className="helper-block">
-            <strong>Deals</strong>
-            <p>Core CRM object with 54 fields currently available for mapping.</p>
-          </div>
-          <div className="helper-block">
-            <strong>Change summary</strong>
-            <ul>
-              <li>2 new fields discovered in the last schema refresh</li>
-              <li>1 field type changed from text to number</li>
-            </ul>
-          </div>
-          <button className="btn btn-secondary full">Review mapping impact</button>
-        </SectionCard>
-      </aside>
-    </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Schema</th>
+              <th>Last Synced</th>
+            </tr>
+          </thead>
+          <tbody>
+            {schemaRows.map(([schema, synced]) => (
+              <tr key={schema}>
+                <td>
+                  <div className="schema-name-cell">
+                    <input type="checkbox" readOnly />
+                    <span>{schema}</span>
+                  </div>
+                </td>
+                <td>{synced}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="pager">
+        <span>Showing 1 to 10 of 25 results</span>
+        <div className="pager-controls">
+          <button className="ghost small">Previous</button>
+          <button className="page-chip active">1</button>
+          <button className="page-chip">2</button>
+          <button className="page-chip">3</button>
+          <button className="ghost small">Next</button>
+          <button className="ghost small">10 per page</button>
+        </div>
+      </div>
+    </SectionShell>
   )
 }
 
 function App() {
-  const [activePage, setActivePage] = useState('overview')
+  const [activeSection, setActiveSection] = useState('hubspot-schema')
+  const [activeProvider, setActiveProvider] = useState('hubspot')
 
-  const pageTitle = useMemo(() => {
-    if (activePage === 'users') return 'Users'
-    if (activePage === 'sync') return 'Sync Setup'
-    if (activePage === 'schema') return 'Schema'
-    return 'Overview'
-  }, [activePage])
-
-  const jumpMap = {
-    'Review users': () => setActivePage('users'),
-    'Fix mapping': () => setActivePage('sync'),
-    'Review schema': () => setActivePage('schema'),
-  }
+  const selectedProvider = providerRail.find((provider) => provider.id === activeProvider)
 
   return (
     <div className="app-shell">
-      <aside className="global-sidebar">
-        <div className="brand-block">
-          <div className="brand-mark">S</div>
+      <aside className="workspace-nav">
+        <div className="workspace-brand">
+          <div className="brand-square">S</div>
           <div>
-            <div className="eyebrow">Supered prototype</div>
-            <strong>Connections redesign</strong>
+            <div className="eyebrow">Supered redesign</div>
+            <strong>Connections UI pass</strong>
           </div>
         </div>
 
-        <nav className="global-nav">
-          <button className="nav-item active">Connections</button>
-          <button className="nav-item">Workflows</button>
-          <button className="nav-item">Reporting</button>
-          <button className="nav-item">Settings</button>
-        </nav>
+        <div className="fake-app-nav">
+          <span className="nav-title">Blakes sandbox</span>
+          <button className="nav-link">Home</button>
+          <button className="nav-link">Content</button>
+          <button className="nav-link">Processes</button>
+          <button className="nav-link">Partner</button>
+          <button className="nav-link active">Bases</button>
+        </div>
 
-        <div className="sidebar-footer">
-          <p>Desktop-first prototype with routed states for stakeholder review.</p>
+        <div className="fake-base-list">
+          {['01. HubSpot Guided Onboarding', 'left lane road company delivery system', 'example of folder structure', 'how we run projects', 'AskElephant training', 'new client', 'sales enablement', 'XYZ acct'].map((item) => (
+            <div key={item} className="base-item">{item}</div>
+          ))}
         </div>
       </aside>
 
-      <main className="workspace">
-        <header className="topbar">
-          <div>
-            <div className="eyebrow">Settings / Connections</div>
-            <h1>Connections workspace</h1>
-          </div>
-          <div className="topbar-actions">
-            <button className="btn btn-secondary">Share preview</button>
-            <button className="btn btn-primary">Add connection</button>
-          </div>
-        </header>
+      <main className="connections-page">
+        <div className="top-meta muted-row">
+          <span>You don’t have the Sidekick Chrome Extension.</span>
+          <button className="link-button">Install in Seconds →</button>
+        </div>
 
-        <div className="content-grid">
+        <div className="page-toolbar">
+          <input className="search large" value="Search..." readOnly />
+          <button className="primary">Invite Team Member</button>
+        </div>
+
+        <div className="feature-shell">
           <aside className="provider-rail">
-            <div className="provider-rail-head">
-              <h2>Providers</h2>
-              <button className="ghost-link">+ Add</button>
-            </div>
-            {providers.map((provider) => (
-              <article key={provider.name} className={`provider-card ${provider.name === 'HubSpot' ? 'selected' : ''}`}>
-                <div className="provider-card-row">
-                  <div className="provider-logo">{provider.name[0]}</div>
-                  <div className="provider-meta">
-                    <strong>{provider.name}</strong>
-                    <span>{provider.account}</span>
-                  </div>
-                  <button className="icon-button">⋯</button>
+            <h2>Connections</h2>
+            {providerRail.map((provider) => (
+              <article
+                key={provider.id}
+                className={`provider-card ${provider.id === activeProvider ? 'selected' : ''}`}
+                onClick={() => setActiveProvider(provider.id)}
+              >
+                <div className="provider-header-row">
+                  <strong>{provider.name}</strong>
+                  <button className={provider.connected ? 'ghost small danger' : 'primary small'}>{provider.action}</button>
                 </div>
-                <div className="provider-status-row">
-                  <Badge tone={provider.tone}>{provider.status}</Badge>
-                  <span>{provider.lastSync}</span>
+                <div className="provider-detail-list">
+                  {provider.details.length ? (
+                    provider.details.map(([label, value]) => (
+                      <div key={label} className="provider-detail-row">
+                        <span>{label}:</span>
+                        <strong>{value || '—'}</strong>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="provider-detail-row">
+                      <span>Not connected yet.</span>
+                    </div>
+                  )}
                 </div>
-                {provider.issueCount ? <div className="provider-issues">{provider.issueCount} items need attention</div> : null}
               </article>
             ))}
           </aside>
 
-          <section className="main-stage">
-            <section className="hero-card">
-              <div>
-                <div className="hero-title-row">
-                  <h2>HubSpot</h2>
-                  <Badge tone="success">Connected</Badge>
-                </div>
-                <p>Connected as ops@acme.com, managing users, sync configuration, and schema health.</p>
-              </div>
-              <div className="hero-actions">
-                <div className="meta-pill">Last sync 18 minutes ago</div>
-                <button className="btn btn-secondary">View logs</button>
-                <button className="btn btn-secondary">Reconnect</button>
-                <button className="btn btn-primary">Sync now</button>
-              </div>
-            </section>
-
-            <div className="tab-row">
-              <button className={`tab ${activePage === 'overview' ? 'active' : ''}`} onClick={() => setActivePage('overview')}>Overview</button>
-              <button className={`tab ${activePage === 'users' ? 'active' : ''}`} onClick={() => setActivePage('users')}>Users</button>
-              <button className={`tab ${activePage === 'sync' ? 'active' : ''}`} onClick={() => setActivePage('sync')}>Sync Setup</button>
-              <button className={`tab ${activePage === 'schema' ? 'active' : ''}`} onClick={() => setActivePage('schema')}>Schema</button>
+          <section className="main-panel">
+            <div className="panel intro-panel">
+              <h1>{selectedProvider.name} Connection</h1>
+              <p>You are connected to {selectedProvider.name}. It will appear as a provider in process rules.</p>
             </div>
 
-            <div className="page-label-row">
-              <div>
-                <div className="eyebrow">Prototype state</div>
-                <strong>{pageTitle}</strong>
-              </div>
-              <div className="section-actions">
-                <Badge tone="warning">Mock data</Badge>
-                <Badge>Desktop preview</Badge>
-              </div>
+            <div className="tabs">
+              <button className={`tab ${activeSection === 'provider-users' ? 'active' : ''}`} onClick={() => setActiveSection('provider-users')}>Provider Users</button>
+              <button className={`tab ${activeSection === 'action-plan-sync' ? 'active' : ''}`} onClick={() => setActiveSection('action-plan-sync')}>Action Plan Sync</button>
+              <button className={`tab ${activeSection === 'hubspot-schema' ? 'active' : ''}`} onClick={() => setActiveSection('hubspot-schema')}>HubSpot Schema</button>
             </div>
 
-            {activePage === 'overview' ? <OverviewPage onJump={(action) => jumpMap[action]?.()} /> : null}
-            {activePage === 'users' ? <UsersPage /> : null}
-            {activePage === 'sync' ? <SyncSetupPage /> : null}
-            {activePage === 'schema' ? <SchemaPage /> : null}
+            {activeSection === 'provider-users' ? <ProviderUsersSection /> : null}
+            {activeSection === 'action-plan-sync' ? <ActionPlanSyncSection /> : null}
+            {activeSection === 'hubspot-schema' ? <HubspotSchemaSection /> : null}
           </section>
         </div>
       </main>
