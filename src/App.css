@@ -48,10 +48,10 @@ button {
 .workspace-nav {
   background: #2c3150;
   border-right: 1px solid #232844;
-  padding: 14px 12px;
+  padding: 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .workspace-brand {
@@ -107,6 +107,7 @@ button {
 
 .connections-page {
   padding: 0;
+  background: #f8fafc;
 }
 
 .top-meta,
@@ -143,7 +144,7 @@ button {
 .page-toolbar {
   align-items: center;
   margin: 0;
-  padding: 10px 18px;
+  padding: 10px 16px;
   background: #2b2e4a;
   border-bottom: 1px solid #232844;
 }
@@ -157,20 +158,22 @@ button {
 }
 
 .search.large {
-  min-width: 520px;
+  min-width: 360px;
+  max-width: 520px;
   margin: 0 auto;
 }
 
 .feature-shell {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: 220px 1fr;
   gap: 0;
+  align-items: start;
 }
 
 .provider-rail,
 .main-panel {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .provider-rail h2,
@@ -180,16 +183,16 @@ button {
 }
 
 .provider-rail h2 {
-  font-size: 24px;
-  padding: 14px 12px 0;
+  font-size: 28px;
+  padding: 16px 14px 0;
 }
 
 .provider-card,
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 12px 14px;
   box-shadow: none;
 }
 
@@ -198,9 +201,9 @@ button {
 }
 
 .provider-card.selected {
-  border-color: #e5e7eb;
-  box-shadow: inset -2px 0 0 var(--brand-primary);
-  background: #ffffff;
+  border-color: #f3bfd8;
+  box-shadow: inset -3px 0 0 var(--brand-primary);
+  background: #fffafd;
 }
 
 .provider-header-row {
@@ -218,7 +221,7 @@ button {
 
 .provider-detail-row strong {
   color: #111827;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -233,8 +236,8 @@ button {
 }
 
 .small {
-  padding: 5px 9px;
-  font-size: 11px;
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .primary {
@@ -261,20 +264,21 @@ button {
 }
 
 .intro-panel {
-  padding: 16px 18px 8px;
+  padding: 18px 18px 10px;
   border: 0;
   border-bottom: 1px solid #e5e7eb;
   border-radius: 0;
+  background: #ffffff;
 }
 
 .intro-panel h1 {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
 }
 
 .intro-panel p {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .tabs,
@@ -289,6 +293,7 @@ button {
   border-bottom: 1px solid #e5e7eb;
   padding: 0 18px;
   margin-top: 0;
+  background: #ffffff;
 }
 
 .tab,
@@ -300,7 +305,7 @@ button {
   background: transparent;
   color: #6b7280;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .tab:hover,
@@ -318,8 +323,9 @@ button {
 .table-wrap {
   overflow: hidden;
   border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-top: 10px;
+  background: #ffffff;
 }
 
 table {
@@ -330,7 +336,7 @@ table {
 th,
 td {
   text-align: left;
-  padding: 9px 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: top;
   font-size: 12px;
@@ -338,7 +344,7 @@ td {
 
 th {
   background: #ffffff;
-  font-size: 11px;
+  font-size: 12px;
   text-transform: none;
   letter-spacing: 0;
   font-weight: 600;
@@ -409,7 +415,7 @@ tbody tr:last-child td {
 }
 
 .panel h3 {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.25;
 }
 
@@ -437,5 +443,9 @@ tbody tr:last-child td {
   .main-panel .panel {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .feature-shell {
+    gap: 12px;
   }
 }
