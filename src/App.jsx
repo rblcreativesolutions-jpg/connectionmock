@@ -334,11 +334,11 @@ function App() {
           <section className="main-panel">
             <div className="panel intro-panel">
               <h1>{selectedProvider.name} Connection</h1>
-              <p>You are connected to {selectedProvider.name}. It will appear as a provider in process rules.</p>
+              <p>Connected to {selectedProvider.name}. It is available as a provider in process rules.</p>
             </div>
 
             <div className="tabs">
-              <button className={`tab ${activeSection === 'provider-users' ? 'active' : ''}`} onClick={() => setActiveSection('provider-users')}>Provider Users</button>
+              <button className={`tab ${activeSection === 'provider-users' ? 'active' : ''}`} onClick={() => setActiveSection('provider-users')}>HubSpot Users</button>
               <button className={`tab ${activeSection === 'action-plan-sync' ? 'active' : ''}`} onClick={() => setActiveSection('action-plan-sync')}>Action Plan Sync</button>
               <button className={`tab ${activeSection === 'hubspot-schema' ? 'active' : ''}`} onClick={() => setActiveSection('hubspot-schema')}>HubSpot Schema</button>
             </div>
