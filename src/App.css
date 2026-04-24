@@ -165,15 +165,16 @@ button {
 
 .feature-shell {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 0;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
   align-items: start;
+  padding: 18px;
 }
 
 .provider-rail,
 .main-panel {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .provider-rail h2,
@@ -184,16 +185,16 @@ button {
 
 .provider-rail h2 {
   font-size: 28px;
-  padding: 16px 14px 0;
+  padding: 4px 4px 0;
 }
 
 .provider-card,
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 14px;
-  box-shadow: none;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .provider-card {
@@ -202,13 +203,13 @@ button {
 
 .provider-card.selected {
   border-color: #f3bfd8;
-  box-shadow: inset -3px 0 0 var(--brand-primary);
-  background: #fffafd;
+  box-shadow: inset -3px 0 0 var(--brand-primary), 0 6px 16px rgba(229, 9, 127, 0.06);
+  background: linear-gradient(180deg, #fffafd 0%, #ffffff 100%);
 }
 
 .provider-header-row {
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .provider-detail-row {
@@ -223,6 +224,7 @@ button {
   color: #111827;
   font-size: 12px;
   font-weight: 500;
+  line-height: 1.35;
 }
 
 .primary,
@@ -264,21 +266,20 @@ button {
 }
 
 .intro-panel {
-  padding: 18px 18px 10px;
-  border: 0;
-  border-bottom: 1px solid #e5e7eb;
-  border-radius: 0;
-  background: #ffffff;
+  padding: 20px 22px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfe 100%);
 }
 
 .intro-panel h1 {
-  font-size: 16px;
+  font-size: 24px;
   line-height: 1.2;
 }
 
 .intro-panel p {
-  margin-top: 6px;
-  font-size: 12px;
+  margin-top: 8px;
+  font-size: 13px;
 }
 
 .tabs,
@@ -291,21 +292,21 @@ button {
 .tabs,
 .subtabs {
   border-bottom: 1px solid #e5e7eb;
-  padding: 0 18px;
-  margin-top: 0;
-  background: #ffffff;
+  padding: 0 4px;
+  margin-top: -4px;
+  background: transparent;
 }
 
 .tab,
 .subtab {
-  padding: 11px 0 9px;
+  padding: 12px 4px 10px;
   border-radius: 0;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: #6b7280;
-  font-weight: 500;
-  font-size: 12px;
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .tab:hover,
@@ -323,8 +324,8 @@ button {
 .table-wrap {
   overflow: hidden;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  margin-top: 10px;
+  border-radius: 12px;
+  margin-top: 12px;
   background: #ffffff;
 }
 
@@ -336,18 +337,19 @@ table {
 th,
 td {
   text-align: left;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: top;
   font-size: 12px;
 }
 
 th {
-  background: #ffffff;
+  background: #fafafa;
   font-size: 12px;
   text-transform: none;
   letter-spacing: 0;
   font-weight: 600;
+  color: #4b5563;
 }
 
 tbody tr:last-child td {
@@ -377,7 +379,7 @@ tbody tr:last-child td {
 .sync-topbar,
 .table-tools {
   align-items: center;
-  margin-top: 10px;
+  margin-top: 12px;
   flex-wrap: wrap;
 }
 
@@ -417,6 +419,10 @@ tbody tr:last-child td {
 .panel h3 {
   font-size: 18px;
   line-height: 1.25;
+}
+
+.main-panel > .panel:not(.intro-panel) {
+  padding-top: 18px;
 }
 
 @media (max-width: 1200px) {
